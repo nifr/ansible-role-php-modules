@@ -1,0 +1,15 @@
+---
+
+- name: "php-modules:disable:modules"
+  command:  'php5dismod -s {{ item.0 }} -m {{ item.1 }}'
+  register: 'php_modules_disable_commands'
+  when: >
+    ( item.1 in php_modules_to_disable_sapi_{{ item.0 }}|default([]) )
+    and
+    ( item.1 in php_modules_enabled_sapi_{{ item.0 }}|default([]) )
+    and
+    ( not item.1 in php_modules_to_enable_sapi_{{ item.0 }}|default([]) )
+  with_nested:
+    - '{{ php_modules_sapis_available }}'
+    - '{{ php_modules_all_names }}'
+

@@ -1,0 +1,17 @@
+---
+
+- name: "php-modules:install:apt:packages[show]"
+  debug: 'var="{{ item }}"'
+  when: 'php_modules_debug'
+  with_items:
+    - "php_modules_all_names"
+    - "php_modules_apt_packages"
+
+- name: "php-modules:install:apt:packages[install] | Install the required apt packages."
+  apt:
+    name:             '{{ item }}'
+    state:            'latest'
+    update_cache:     '{{ php_modules_apt_cache_update }}'
+    cache_valid_time: '{{ php_modules_apt_cache_timeout }}'
+  with_items:
+    - '{{ php_modules_apt_packages }}'

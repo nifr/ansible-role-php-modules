@@ -1,0 +1,114 @@
+---
+
+php_modules_debug: '{{ debug|default(false) }}'
+
+php_modules_apt_cache_update:  '{{ "yes" if apt_cache_update|default(true) else "no" }}'
+php_modules_apt_cache_timeout: '{{ apt_cache_timeout|default(3600) }}'
+
+php_modules_sapis_available: []
+php_modules_available: []
+
+php_modules_defaults:
+  disabled: []
+  enabled: []
+
+php_modules_extra: []
+
+php_modules_all_mixed: >
+  {{
+    php_modules_defaults.enabled
+      | default([])
+      | union(
+          php_modules_defaults.disabled
+            | default([])
+        )
+      | union(
+          php_modules_extra
+            | default([])
+            | map(attribute="modules.enabled")
+            | list
+            | first
+            | union(
+              php_modules_extra
+                | default([])
+                | map(attribute="modules.disabled")
+                | list
+                | first
+            )
+        )
+
+  }}
+
+php_modules_all_names: >
+  {{
+      php_modules_all_mixed
+        | default([])
+        | reject("mapping")
+        | list
+        | union(
+          php_modules_all_mixed
+            | default([])
+            | select("mapping")
+            | list
+            | map(attribute="name")
+            | list
+        )
+        | unique
+  }}
+
+php_modules_apt_packages_overrides:
+  readline: php5-readline   # needed for console autocompletion/history
+  intl:     php5-intl       # needed for translations, symfony/intl is limited to 'en'
+  mcrypt:   php5-mcrypt     # speeds up phpseclib cryptographic operations
+  curl:     php5-curl       # needed for composer to work
+  mysql:    php5-mysql      # provides pdo_mysql module, mysql and improved mysqli modules
+  sqlite:   php5-sqlite     # default backend for symfony's web-profiler
+  xdebug:   php5-xdebug          # debugging: https://launchpad.net/~ondrej/+archive/ubuntu/php5-5.6?field.series_filter=trusty
+  # xhprof:   php5-xhprof     # debugging
+  imagick:  php5-imagick    # backend for imagine, performs better than GD
+  gd:       php5-gd         # backend for imagine
+  json:     php5-json        # https://launchpad.net/~ondrej/+archive/ubuntu/php5-5.6?field.series_filter=trusty
+  mongo:    php5-mongo       # https://launchpad.net/~ondrej/+archive/ubuntu/php5-5.6?field.series_filter=trusty
+
+php_modules_apt_packages: >
+  {{
+    php_modules_all_mixed
+      | default([])
+      | reject("mapping")
+      | list
+      | union(
+        php_modules_all_mixed
+          | default([])
+          | select ("mapping")
+          | list
+          | rejectattr("install", "in", [false, "pecl"])
+          | list
+          | map(attribute="name")
+          | list
+      )
+      | reject("in", php_modules_apt_packages_overrides.keys())
+      | list
+      | map("regex_replace", "^", "php5-")
+      | list
+      | union(
+        php_modules_apt_packages_overrides.values() | default([])
+      )
+      | reject("sameas", [])
+      | list
+  }}
+
+
+# select only by key
+#      |
+#      | union(
+#        php_modules_apt_packages_extra.values()
+#        | reject("in", php_modules_all)
+#      )
+
+
+
+
+
+
+
+

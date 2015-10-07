@@ -1,0 +1,67 @@
+---
+
+- name: "php-modules:get:modules:to-enable"
+  set_fact: 'php_modules_to_enable_sapi_{{ item.0 }}="{{
+          php_modules_defaults.enabled
+            | default([])
+            | reject("mapping")
+            | list
+            | union(
+                php_modules_defaults.enabled
+                  | default([])
+                  | select("mapping")
+                  | list
+                  | map(attribute="name")
+                  | list
+              )
+            | union(
+                php_modules_extra
+                  | default([])
+                  | selectattr("sapi", "in", [item.0])
+                  | list
+                  | map(attribute="modules.enabled")
+                  | list
+                  | first
+                  | reject("mapping")
+                  | list
+                  | union(
+                      php_modules_extra
+                        | default([])
+                        | selectattr("sapi", "in", [item.0])
+                        | list
+                        | map(attribute="modules.enabled")
+                        | list
+                        | first
+                        | select("mapping")
+                        | list
+                        | map(attribute="name")
+                        | list
+                    )
+              )
+            | difference(
+                php_modules_extra
+                  | default([])
+                  | selectattr("sapi", "in", [item.0])
+                  | list
+                  | map(attribute="modules.disabled")
+                  | list
+                  | first
+                  | reject("mapping")
+                  | list
+                  | union(
+                      php_modules_extra
+                        | default([])
+                        | selectattr("sapi", "in", [item.0])
+                        | list
+                        | map(attribute="modules.disabled")
+                        | list
+                        | first
+                        | select("mapping")
+                        | map(attribute="name")
+                        | list
+                    )
+              )
+      }}"'
+  with_nested:
+    - '{{ php_modules_sapis_available }}'
+    - '{{ php_modules_all_names }}'

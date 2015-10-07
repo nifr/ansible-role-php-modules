@@ -1,0 +1,10 @@
+---
+
+- name: "php-modules:get:modules:status[register]"
+  command:      'php5query -q -s {{ item.0 }} -m {{ item.1 }}'
+  register:     'php_modules_status_commands'
+  failed_when:  false
+  changed_when: false
+  with_nested:
+    - '{{ php_modules_sapis_available }}'
+    - '{{ php_modules_available }}'

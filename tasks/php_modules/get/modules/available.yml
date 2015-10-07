@@ -1,0 +1,13 @@
+---
+
+- name: "php-modules:get:modules:available[get]"
+  command: "php5query -M"
+  register: 'php_modules_available_command_result'
+  changed_when: false
+
+- name: "php-modules:get:modules:available[register]"
+  set_fact: 'php_modules_available="{{ php_modules_available_command_result.stdout_lines|list }}"'
+
+- name: "php-modules:get:modules:available[show]"
+  debug: var=php_modules_available
+  when: php_modules_debug

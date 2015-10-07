@@ -1,0 +1,19 @@
+---
+
+- name: "php-modules:get:sapis:available[get]"
+  command: "php5query -S"
+  register: php_modules_sapi_status_command
+  changed_when: false
+
+- name: "php-modules:get:sapis:available[register]"
+  set_fact: 'php_modules_sapis_available="{{ php_modules_sapi_status_command.stdout_lines|list }}"'
+
+- name: "php-modules:get:sapis:available[validate]"
+  fail: msg="You're trying to configure modules for a PHP SAPI that does not exist on the target system."
+  when: 'item not in php_modules_sapis_available'
+  with_items:
+    - '{{ php_modules_extra|map(attribute="sapi")|list|unique }}'
+
+- name: "php-modules:get:sapis:available[show]"
+  debug: var=php_modules_sapis_available
+  when: php_modules_debug

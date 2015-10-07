@@ -1,0 +1,14 @@
+---
+
+- name: "php-modules:enable:modules"
+  command:  'php5enmod -s {{ item.0 }} -m {{ item.1 }}'
+  register: 'php_modules_enable_commands'
+  when: >
+    ( item.1 in php_modules_to_enable_sapi_{{ item.0 }}|default([]) )
+    and
+    ( item.1 in php_modules_disabled_sapi_{{ item.0 }}|default([]) )
+    and
+    ( not item.1 in php_modules_to_disable_sapi_{{ item.0 }}|default([]) )
+  with_nested:
+    - '{{ php_modules_sapis_available }}'
+    - '{{ php_modules_all_names }}'

@@ -1,0 +1,12 @@
+---
+
+- name: "php-modules:get:modules:enabled[register]"
+  set_fact: 'php_modules_enabled_sapi_{{ item }}="{{ php_modules_status_commands.results | selectattr("rc", "sameas", 0) | map(attribute="item") | list | select("contains", item) | list | map("last") | list }}"'
+  with_items:
+    - '{{ php_modules_sapis_available }}'
+
+- name: "php-modules:get:modules:enabled[show]"
+  debug: 'var=php_modules_enabled_sapi_{{ item }}'
+  with_items:
+      - '{{ php_modules_sapis_available }}'
+  when:  'php_modules_debug'

@@ -1,0 +1,29 @@
+---
+
+- name: "php-modules:notify:services | Set service states."
+  service:
+    name:  '{{ item.service }}'
+    state: '{{ item.state }}'
+  when: >
+    php_modules_extra
+      | selectattr("notify", "defined")
+      | list
+      | selectattr("notify", "contains", item)
+      | list
+      | map(attribute="sapi")
+      | list
+      | intersect(
+          php_modules_enable_commands.results
+            | union(
+                php_modules_disable_commands.results
+              )
+            | selectattr("changed", "sameas", true)
+            | list
+            | map(attribute="item.0")
+            | list
+        )
+      is len("gt", 0)
+  with_flattened:
+    - '{{ php_modules_extra | selectattr("notify", "is_list") | list | map(attribute="notify") | list }}'
+
+

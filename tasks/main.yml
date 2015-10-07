@@ -1,0 +1,5 @@
+---
+
+- include: php_modules.yml
+  tags:
+    - php-modules
