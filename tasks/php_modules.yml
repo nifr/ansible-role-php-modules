@@ -1,5 +1,8 @@
 ---
 
+- include: "php_modules/install/packages.yml"
+  tags: [php-modules, install, packages]
+
 - include: "php_modules/get/sapis/available.yml"
   tags: [php-modules, get, sapis, available]
 
@@ -14,9 +17,6 @@
 
 - include: "php_modules/get/modules/disabled.yml"
   tags: [php-modules, get, modules, enabled]
-
-- include: "php_modules/install/packages.yml"
-  tags: [php-modules, install, packages]
 
 - include: "php_modules/get/modules/to_enable.yml"
   tags: [php-modules, get, modules, to-enable]
